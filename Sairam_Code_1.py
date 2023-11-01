@@ -183,17 +183,15 @@ sns.scatterplot(data=df,x='Hour',y='NUMBER OF PERSONS KILLED',hue='CONTRIBUTING 
 plt.xlabel('Hour')
 plt.ylabel('Number of Casualities')
 plt.show()
-# %%
-hourly_data = df.groupby(['Hour', 'CONTRIBUTING FACTOR VEHICLE 1'])['NUMBER OF PERSONS KILLED'].sum().reset_index()
 
-leading_factor_by_hour = hourly_data.groupby('Hour').apply(lambda x: x['CONTRIBUTING FACTOR VEHICLE 1'][x['NUMBER OF PERSONS KILLED'].idxmax()])
+# %%
+hourly_data = df.groupby('Hour').apply(lambda x: x.loc[x['NUMBER OF PERSONS KILLED'].idxmax()])[['CONTRIBUTING FACTOR VEHICLE 1', 'NUMBER OF PERSONS KILLED']]
 
 plt.figure(figsize=(12, 6))
-sns.barplot(data=hourly_data, x='Hour', y='NUMBER OF PERSONS KILLED', hue=leading_factor_by_hour, ci=None)
-plt.title("Total Number of Persons Killed by Hour with Leading Contributing Factor")
+sns.barplot(data=hourly_data, x=hourly_data.index, y='NUMBER OF PERSONS KILLED',hue='CONTRIBUTING FACTOR VEHICLE 1')
+plt.title("Number of Persons Killed by Hour with Leading Contributing Factor")
 plt.xlabel("Hour")
-plt.ylabel("Total Number of Persons Killed")
-plt.legend(title='Leading Factor')
+plt.ylabel("Number of Persons Killed")
 plt.xticks(rotation=45)
 plt.show()
 # %%
