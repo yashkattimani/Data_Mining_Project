@@ -177,12 +177,7 @@ df['CONTRIBUTING FACTOR VEHICLE 1'].value_counts()
 #%%
 df['VEHICLE TYPE CODE 1'].value_counts()
 
-# %%
-plt.figure(figsize=(10,10))
-sns.scatterplot(data=df,x='Hour',y='NUMBER OF PERSONS KILLED',hue='CONTRIBUTING FACTOR VEHICLE 1')
-plt.xlabel('Hour')
-plt.ylabel('Number of Casualities')
-plt.show()
+
 
 # %%
 hourly_data = df.groupby('Hour').apply(lambda x: x.loc[x['NUMBER OF PERSONS KILLED'].idxmax()])[['CONTRIBUTING FACTOR VEHICLE 1', 'NUMBER OF PERSONS KILLED']]
@@ -194,4 +189,69 @@ plt.xlabel("Hour")
 plt.ylabel("Number of Persons Killed")
 plt.xticks(rotation=45)
 plt.show()
+# %%
+hour_factor_data=pd.DataFrame(df.groupby(['Hour','CONTRIBUTING FACTOR VEHICLE 1'])['NUMBER OF PERSONS KILLED'].sum())
+hour_factor_data.head(20)
+
+# %%
+hour_factor_data.reset_index(inplace=True)
+hour_factor_data.set_index(['Hour'],inplace=True)
+hour_factor_data.head()
+# %%
+max_factors = hour_factor_data.groupby('Hour').apply(lambda x: x[x['NUMBER OF PERSONS KILLED'] == x['NUMBER OF PERSONS KILLED'].max()])
+
+# Create a bar graph
+plt.figure(figsize=(10, 6))
+plt.bar(max_factors.index, max_factors['NUMBER OF PERSONS KILLED'])
+plt.xlabel('Hour')
+plt.ylabel('Max Number of Persons Killed')
+plt.title('Max Number of Persons Killed and Corresponding Factor by Hour')
+plt.xticks(rotation=45)
+plt.show()
+
+# %%
+df.head()
+# %%
+by_vehicle=pd.DataFrame(df.groupby(['VEHICLE TYPE CODE 1','VEHICLE TYPE CODE 2'])['NUMBER OF PERSONS KILLED'].sum())
+by_vehicle=by_vehicle[by_vehicle['NUMBER OF PERSONS KILLED']>10]
+print(by_vehicle.shape)
+by_vehicle.head()
+# %%
+by_vehicle.reset_index(inplace=True)
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=by_vehicle,x='VEHICLE TYPE CODE 1',y='VEHICLE TYPE CODE 2',hue='NUMBER OF PERSONS KILLED',size='NUMBER OF PERSONS KILLED')
+plt.xlabel('Vehicle 1')
+plt.ylabel('Vehicle 2')
+plt.title('Vehicle 1 vs Vehicle 2 ')
+plt.xticks(rotation=45)
+plt.yticks(rotation=45)
+plt.show()
+# %%
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=by_vehicle,x='VEHICLE TYPE CODE 1',y='NUMBER OF PERSONS KILLED',hue='VEHICLE TYPE CODE 2',s=100)
+plt.xlabel('Vehicle 1')
+plt.ylabel('Persons Killed')
+plt.title('Vehicle 1 vs Persons killed')
+plt.xticks(rotation=45)
+plt.yticks(rotation=45)
+plt.show()
+# %%
+
+cyclist_accidents=rush_hour_data[rush_hour_data['NUMBER OF CYCLIST INJURED']>0]
+top_10_cyclist_locations = cyclist_accidents.sort_values(by='NUMBER OF CYCLIST INJURED', ascending=False).head(10)
+
+m = folium.Map(location=[40.7128, -74.0060], zoom_start=10)
+
+locations = top_10_cyclist_locations[['LATITUDE', 'LONGITUDE']].values
+
+gradient = {
+    0.2: 'blue',
+    0.4: 'green',
+    0.6: 'orange',
+    1.0: 'red'
+}
+
+HeatMap(data=locations, gradient=gradient, radius=15).add_to(m)
+
+m
 # %%
