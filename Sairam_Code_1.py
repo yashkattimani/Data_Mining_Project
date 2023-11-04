@@ -255,3 +255,112 @@ HeatMap(data=locations, gradient=gradient, radius=15).add_to(m)
 
 m
 # %%
+df.head()
+# %%
+df.columns
+# %%
+by_borough = df.groupby(['BOROUGH','Year'])[['NUMBER OF PERSONS INJURED','NUMBER OF PERSONS KILLED','NUMBER OF PEDESTRIANS INJURED',
+       'NUMBER OF PEDESTRIANS KILLED', 'NUMBER OF CYCLIST INJURED',
+       'NUMBER OF CYCLIST KILLED', 'NUMBER OF MOTORIST INJURED',
+       'NUMBER OF MOTORIST KILLED']].sum()
+by_borough.head()
+#%% 
+by_borough.reset_index(inplace=True)
+# %%
+plt.figure(figsize=(10, 8))
+sns.scatterplot(data=by_borough, x='Year', y='NUMBER OF PERSONS INJURED', hue='BOROUGH',size='NUMBER OF PERSONS KILLED')
+plt.xlabel('Year')
+plt.ylabel('Injured')
+plt.title("Scatter plot of People Injured by Year")
+plt.show()
+# %%
+import plotly.express as px
+
+fig = px.scatter(by_borough, y='NUMBER OF PERSONS KILLED', x='NUMBER OF PERSONS INJURED', color='BOROUGH', size='NUMBER OF PERSONS KILLED', animation_frame='Year')
+
+fig.update_xaxes(range=[0, 17000]) 
+fig.update_yaxes(range=[0, 100])   
+
+fig.show()
+
+# %%
+df.columns
+# %%
+
+fig = px.scatter(by_borough, y='NUMBER OF CYCLIST KILLED', x='NUMBER OF MOTORIST KILLED', color='BOROUGH', size='NUMBER OF CYCLIST KILLED', animation_frame='Year')
+
+fig.update_xaxes(range=[0, 50]) 
+fig.update_yaxes(range=[0, 20])   
+
+fig.show()
+
+# %%
+df.columns
+
+#%%
+plt.figure(figsize=(10, 8))
+sns.scatterplot(data=df,x='CONTRIBUTING FACTOR VEHICLE 1',y='NUMBER OF PERSONS INJURED')
+plt.xlabel('Ye')
+plt.ylabel('Injured')
+plt.title("Scatter plot of People Injured by Year")
+plt.show()
+#%%
+plt.figure(figsize=(10, 8))
+sns.stripplot(data=df,x='CONTRIBUTING FACTOR VEHICLE 1',y='NUMBER OF PERSONS INJURED',jitter=True)
+plt.xticks(rotation=45)
+plt.show()
+# %%
+by_factor_year = pd.DataFrame(df.groupby(['CONTRIBUTING FACTOR VEHICLE 1','Year'])[['NUMBER OF PERSONS INJURED','NUMBER OF PERSONS KILLED']].sum())
+# %%
+by_factor_year.head()
+by_factor_year.reset_index(inplace=True)
+# %%
+
+fig = px.scatter(by_factor_year, y='NUMBER OF PERSONS KILLED',x='NUMBER OF PERSONS INJURED' ,color='CONTRIBUTING FACTOR VEHICLE 1', animation_frame='Year')
+
+fig.update_xaxes(range=[0, 170]) 
+fig.update_yaxes(range=[0, 10])   
+
+fig.show()
+
+
+# %%
+df['CONTRIBUTING FACTOR VEHICLE 1'].unique()
+# %%
+counts=df.groupby('CONTRIBUTING FACTOR VEHICLE 1').count()
+# %%
+counts.reset_index(inplace=True)
+#%%
+counts
+# %%
+top_10_factors = counts.sort_values(by='Year', ascending=False).head(11)
+
+print("Top 10 Contributing Factors by Counts:")
+print(top_10_factors)
+
+# Now, create a bar graph to visualize the top 10 contributing factors
+plt.figure(figsize=(10, 6))
+plt.bar(top_10_factors['CONTRIBUTING FACTOR VEHICLE 1'], top_10_factors['Year'])
+plt.title('Top 10 Contributing Factors by Counts')
+plt.xlabel('Contributing Factors')
+plt.ylabel('Counts')
+plt.xticks(rotation=45)
+plt.show()
+# %%
+top_factors = top_10_factors['CONTRIBUTING FACTOR VEHICLE 1'].tolist()
+filtered_df = df[df['CONTRIBUTING FACTOR VEHICLE 1'].isin(top_factors)]
+
+# Group the filtered DataFrame by year and factor, counting incidents
+grouped_df = filtered_df.groupby(['Year', 'CONTRIBUTING FACTOR VEHICLE 1']).size().reset_index(name='Incidents')
+
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=grouped_df, x='Year', y='Incidents', hue='CONTRIBUTING FACTOR VEHICLE 1')
+plt.title('Yearly Incidents by Contributing Factor')
+plt.xlabel('Year')
+plt.ylabel('Number of Incidents')
+plt.legend(title='Contributing Factor', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.xticks(rotation=45)
+plt.show()
+
+
+# %%
