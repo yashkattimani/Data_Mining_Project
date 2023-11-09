@@ -364,3 +364,24 @@ plt.show()
 
 
 # %%
+df.head()
+
+# %%
+df['Month'] = df['CRASH DATE'].dt.month
+df['Day'] = df['CRASH DATE'].dt.day
+df['Day of Week'] = df['CRASH DATE'].dt.strftime('%A')
+# %%
+by_month=df.groupby(['Month','Year']).count()
+by_day_of_week=df.groupby('Day of Week').count()
+
+by_month.reset_index(inplace=True)
+# %%
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=by_month, x='Month', y='ZIP CODE',hue='Year')
+plt.title('Monthly Incidents')
+plt.xlabel('Month')
+plt.ylabel('Number of Incidents')
+plt.xticks(rotation=45)
+plt.show()
+
+# %%
