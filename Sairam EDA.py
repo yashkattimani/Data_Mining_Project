@@ -311,3 +311,53 @@ sorted_factors = fatal_proportions.sort_values(ascending=False)
 
 top_10_factors = sorted_factors.head(10)
 print(top_10_factors)
+
+#%% [markdown]
+#Seasonal/temporal analysis? More accidents in winter? During rush hour? Are they more deadly or more likely to result in injury at a different time? (Kush, Sairam)
+
+
+
+# %%
+df.head()
+# %%
+df['DATETIME'].max()
+# %%
+df['DATETIME'].min()
+
+# %%
+# removing 2012 and 2023 as they are incomplete years
+full_year = df[(df['YEAR'] > 2012) & (df['YEAR'] < 2023)]
+full_year['DATETIME'].min()
+# %%
+def get_season(month):
+    if 3 <= month <= 5:
+        return 'Spring'
+    elif 6 <= month <= 8:
+        return 'Summer'
+    elif 9 <= month <= 11:
+        return 'Fall'
+    else:
+        return 'Winter'
+#%%
+full_year['SEASON'] = full_year['MONTH'].apply(get_season)
+full_year[['MONTH','SEASON']].head(20)
+
+
+# %%
+by_season=full_year.groupby(['SEASON','YEAR'])[['NUMINJ','NUMKIL']].count()
+# %%
+by_season=full_year.groupby(['SEASON'])[['NUMINJ','NUMKIL']].count()
+plt.figure(figsize=(10,8))
+sns.barplot(by_season,x='SEASON',y='NUMINJ',hue='SEASON')
+plt.title("Accident Occurence by Season")
+plt.show()
+# %%
+
+by_season = full_year.groupby(['SEASON', 'YEAR'])[['NUMINJ', 'NUMKIL']].count().reset_index()
+
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
+plt.show()
+
+# %%
