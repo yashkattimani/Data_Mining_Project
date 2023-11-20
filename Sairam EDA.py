@@ -163,6 +163,7 @@ pd.to_datetime(dfacc["DATETIME"])
 dfacc["YEAR"] = dfacc["DATETIME"].dt.year
 dfacc["MONTH"] = dfacc["DATETIME"].dt.month
 dfacc["DAY"] = dfacc["DATETIME"].dt.day
+dfacc["HOUR"] = dfacc["DATETIME"].dt.hour
 
 #%%
 print(dfacc.info())
@@ -360,4 +361,133 @@ plt.figure(figsize=(10, 6))
 sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
 plt.show()
 
+#%%[markdown]
+
+# Are accidents more deadlier and dangerous in different seasons ?
+
+# %%
+
+by_season = full_year.groupby(['SEASON', 'YEAR'])[['NUMINJ', 'NUMKIL']].mean().reset_index()
+
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
+plt.title("Average number of people injured by season")
+plt.show()
+
+
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=by_season,x='YEAR',y='NUMKIL',hue='SEASON')
+plt.title("Average number of people killed by season")
+plt.show()
+
+
+#%%[markdown]
+
+# Are accidents more deadlier and dangerous at different times ?
+
+
+
+
+# %%
+
+by_hour = full_year.groupby(['HOUR'])[['NUMINJ', 'NUMKIL','NUMPEDINJ', 'NUMPEDKIL', 'NUMCYCINJ',
+       'NUMCYCKIL', 'NUMMOTINJ', 'NUMMOTKIL']].mean().reset_index()
+
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=by_hour,x='HOUR',y='NUMINJ')
+plt.title("Average number of people injured by hour")
+plt.show()
+
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=by_hour,x='HOUR',y='NUMKIL')
+plt.title("Average number of people killed by hour")
+plt.show()
+
+
+#%%
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=by_hour, x='HOUR', y='NUMPEDINJ', label='Pedestrian Injuries')
+sns.lineplot(data=by_hour, x='HOUR', y='NUMCYCINJ', label='Cyclist Injuries')
+sns.lineplot(data=by_hour, x='HOUR', y='NUMMOTINJ', label='Motorist Injuries')
+plt.legend()
+plt.title("Average Number of People Injured by Hour")
+plt.xlabel("Hour of the Day")
+plt.ylabel("Average Number of Injuries")
+plt.show()
+# %%
+plt.figure(figsize=(15, 10))
+
+# Subplot 1: NUMPEDINJ
+plt.subplot(2, 2, 1)
+sns.barplot(data=by_hour, x='HOUR', y='NUMPEDINJ', color='skyblue')
+plt.title('Pedestrian Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Average Number of Injuries')
+
+# Subplot 2: NUMCYCINJ
+plt.subplot(2, 2, 2)
+sns.barplot(data=by_hour, x='HOUR', y='NUMCYCINJ', color='lightcoral')
+plt.title('Cyclist Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Average Number of Injuries')
+
+# Subplot 3: NUMMOTINJ
+plt.subplot(2, 2, 3)
+sns.barplot(data=by_hour, x='HOUR', y='NUMMOTINJ', color='lightgreen')
+plt.title('Motorist Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Average Number of Injuries')
+
+# Subplot 4: NUMINJ
+plt.subplot(2, 2, 4)
+sns.barplot(data=by_hour, x='HOUR', y='NUMINJ', color='orange')
+plt.title('Total Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Average Number of Injuries')
+
+plt.tight_layout()
+plt.show()
+
+#%%[markdown]
+#Same thing but totals instead of averages
+# %%
+
+by_hour = full_year.groupby(['HOUR'])[['NUMINJ', 'NUMKIL','NUMPEDINJ', 'NUMPEDKIL', 'NUMCYCINJ',
+       'NUMCYCKIL', 'NUMMOTINJ', 'NUMMOTKIL']].sum().reset_index()
+
+plt.figure(figsize=(15, 10))
+
+# Subplot 1: NUMPEDINJ
+plt.subplot(2, 2, 1)
+sns.barplot(data=by_hour, x='HOUR', y='NUMPEDINJ', color='skyblue')
+plt.title('Pedestrian Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Total Number of Injuries')
+
+# Subplot 2: NUMCYCINJ
+plt.subplot(2, 2, 2)
+sns.barplot(data=by_hour, x='HOUR', y='NUMCYCINJ', color='lightcoral')
+plt.title('Cyclist Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Total Number of Injuries')
+
+# Subplot 3: NUMMOTINJ
+plt.subplot(2, 2, 3)
+sns.barplot(data=by_hour, x='HOUR', y='NUMMOTINJ', color='lightgreen')
+plt.title('Motorist Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Total Number of Injuries')
+
+# Subplot 4: NUMINJ
+plt.subplot(2, 2, 4)
+sns.barplot(data=by_hour, x='HOUR', y='NUMINJ', color='orange')
+plt.title('Total Injuries')
+plt.xlabel('Hour of the Day')
+plt.ylabel('Total Number of Injuries')
+
+plt.tight_layout()
+plt.show()
 # %%

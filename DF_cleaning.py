@@ -163,7 +163,7 @@ pd.to_datetime(dfacc["DATETIME"])
 dfacc["YEAR"] = dfacc["DATETIME"].dt.year
 dfacc["MONTH"] = dfacc["DATETIME"].dt.month
 dfacc["DAY"] = dfacc["DATETIME"].dt.day
-
+dfacc["HOUR"] = dfacc["DATETIME"].dt.hour
 #%%
 print(dfacc.info())
 
