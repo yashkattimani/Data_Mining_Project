@@ -1,6 +1,6 @@
-# Data_Mining_Project
+#### Data_Mining_Project
 
-#### This is a hihg-level overview of project status, updated after each of our weekly meetings.
+#### This is a high-level overview of project status, updated after each of our weekly meetings.
 
 #### File list:
 ####     1. SMART: working draft of revised SMART questions, per prof feedback
