@@ -6,3 +6,8 @@
 ####     3. Link to working slide deck: https://docs.google.com/presentation/d/1O9aPc64ixNEqaamuab_gVBomq99bCkcbZcgjg70zyBQ/edit#slide=id.g29881017c93_0_122 
 
 #### Update 11/7: The plan is for team members to do EDA an reconvene on Friday, 11/10. We can decide on who focuses on which SMART question at this Friday meeting.
+
+####
+
+#### Update 11/19: The team met to discuss progress on EDA and ideas for models. We decided to Keep working on our assigned pieces, and start getting EDA and statistical test results int the deck by Nov 25, and to dig into models as well. Our aim is to complete our draft slides by our 12/2 Team meeting.
+
