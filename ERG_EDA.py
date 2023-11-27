@@ -10,6 +10,8 @@ import numpy as np
 import seaborn as sns
 #import sklearn
 from sklearn import linear_model
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
 # %%
 
 # --> ERG Note to team: rename csv as "acc.csv"
@@ -137,7 +139,6 @@ dfacc.info()
 dfacc.describe().round(2)
 
 #%%
-
 # Now, correcting data types
 
 #%%
@@ -166,26 +167,47 @@ dfacc["YEAR"] = dfacc["DATETIME"].dt.year
 dfacc["MONTH"] = dfacc["DATETIME"].dt.month
 dfacc["DAY"] = dfacc["DATETIME"].dt.day
 
+# %%
+# add a column for month and year
+dfacc['monyear'] = dfacc['DATETIME'].dt.to_period('M')
+# add a column with value one to permit counting of accidents later.
+dfacc["COUNT"] = 1
+#dfacc_monyear_harms = pd.DataFrame(dfacc[["monyear", "NUMINJ", "NUMKIL"]])
+
+# add columns for whether there were injuries and whether their were deaths
+dfacc["INJBOL"] = dfacc["NUMINJ"] > 0
+dfacc["KILBOL"] = dfacc["NUMKIL"] > 0
+
 #%%
 print(dfacc.info())
 
 #%%
-sns.histplot(data = dfacc, x = "NUMKIL")
+sns.histplot(data = dfacc, hue = "BOROUGH", x = "NUMKIL", multiple = "stack")
 # Most accidents don't lead to deaths. No accident caused more than 8 deaths. (Assuming the records are complete + accurate.)
 
 #%%
-sns.histplot(data = dfacc, x = "NUMINJ")
+# average number of deathsper accident
+sns.barplot(data = dfacc, hue = "BOROUGH", x = "BOROUGH", y = "NUMKIL", legend = False)
+
+#%%
+sns.histplot(data = dfacc, hue = "BOROUGH", x = "NUMINJ", multiple = "stack")
+# 
+#%%
+# average number of injuries per accident
+sns.barplot(data = dfacc, hue = "BOROUGH", x = "BOROUGH", y = "NUMINJ", legend = False)
 # 
 
 #%%
-sns.histplot(data = dfacc, x = "BOROUGH")
+sns.histplot(data = dfacc, x = "BOROUGH", hue = "BOROUGH", legend = False)
 # Over the full time window, Brooklyn has had the most accidents, 
 # followed by Queens, Manhattan, the Bronx, and Statten Island.
 
 #%%
-sns.histplot(data = dfacc, x = "DATETIME")
+sns.histplot(data = dfacc, bins = 136, hue = "BOROUGH", x = "DATETIME", multiple = "stack")
 # There is a clear drop in # accidents after pandemic onset!
 # There does appear to be a cyclical variation in the number of accidents!
+#%%
+#sns.histplot(data = dfacc, hue = "BOROUGH", x = "monyear")
 
 #%%
 # Let's look by month: 
@@ -195,41 +217,168 @@ sns.histplot(data = dfacc, x = "MONTH")
 
 #%%
 # Let's look before COVID lockdown (roughly defined as before 2020)
-dfacc_bef = dfacc.loc[(dfacc["YEAR"] <= 2020)]
-sns.histplot(data = dfacc_bef, x = "MONTH")
+dfacc_bef = dfacc.loc[(dfacc["YEAR"] < 2020)]
+sns.histplot(data = dfacc_bef, hue = "BOROUGH", x = "MONTH", multiple = "stack")
 
 # Seems a bit more pronounced. Worth testing further... later!
+
+#%%
+# Let's look after COVID lockdown (after 2020)
+dfacc_aft = dfacc.loc[(dfacc["YEAR"] > 2020)]
+sns.histplot(data = dfacc_aft, hue = "BOROUGH", x = "MONTH")
 
 #%%
 
 # Now for some temporal trends!
 sns.scatterplot(x = "DATETIME", y = "NUMINJ",
-             hue="BOROUGH", data = dfacc)
+             hue = "BOROUGH", data = dfacc)
 
 #%%
 sns.scatterplot(x = "DATETIME", y = "NUMKIL",
              hue = "BOROUGH", data = dfacc)
 
-# %%
-dfacc['monyear'] = dfacc['DATETIME'].dt.to_period('M')
-
-#dfacc_monyear_harms = pd.DataFrame(dfacc[["monyear", "NUMINJ", "NUMKIL"]])
-
 #%%
-dacc_mytest = dfacc.groupby(["monyear", "BOROUGH"]).NUMKIL.sum().reset_index()
-#%%
-dacc_mytest_inj = dfacc.groupby(["monyear", "BOROUGH"]).NUMINJ.sum().reset_index()
+import statsmodels.api as sm
+from statsmodels.formula.api import glm
+modelINJ = glm ( formula = 'INJBOL ~ MONTH + YEAR + BOROUGH + CFV1', data = dfacc , family = sm.families.Binomial())
+
+modelINJ = modelINJ.fit()
+print( modelINJ.summary() )
 
 #%%
+#dacc_mytest = dfacc.groupby(["monyear", "BOROUGH"]).NUMKIL.sum().reset_index()
 #%%
-dacc_mytest_inj["monyear"] = dacc_mytest_inj["monyear"].astype("datetime64[ns]")
+#dacc_mytest_inj = dfacc.groupby(["monyear", "BOROUGH"]).NUMINJ.sum().reset_index()
+
+#%%
+#dacc_mytest_inj["monyear"] = dacc_mytest_inj["monyear"].astype("datetime64[ns]")
+#sns.scatterplot(x = "monyear", y = "NUMINJ",
+#             hue = "BOROUGH", data = dacc_mytest_inj)
+
+#%%
+#dacc_mytest["monyear"] = dacc_mytest["monyear"].astype("datetime64[ns]")
+#sns.scatterplot(x = "monyear", y = "NUMKIL", hue = "BOROUGH", data = dacc_mytest )
+
+#%%
+# New efforts 11/25/2023
+
+#dfacc["INJBOL"] = dfacc["NUMINJ"] > 0
+#dfacc["KILBOL"] = dfacc["NUMKIL"] > 0
+
+#%%
+# Adding Creating monthly version of original dfacc
+dfacc_monthly = dfacc.groupby(["monyear", "BOROUGH"]).COUNT.sum().reset_index()
+
+# creating monthly for each of the elements of interest by borough 
+dfacc_monthly_inj = dfacc.groupby(["monyear", "BOROUGH"]).NUMINJ.sum().reset_index()
+dfacc_monthly_injbol = dfacc.groupby(["monyear", "BOROUGH"]).INJBOL.sum().reset_index()
+dfacc_monthly_kil = dfacc.groupby(["monyear", "BOROUGH"]).NUMKIL.sum().reset_index()
+dfacc_monthly_kilbol = dfacc.groupby(["monyear", "BOROUGH"]).KILBOL.sum().reset_index()
+
+#%%
+# And now adding these columns to the monthly df
+
+dfacc_monthly["NUMINJ"] = dfacc_monthly_inj["NUMINJ"]
+dfacc_monthly["NUMACCINJ"] = dfacc_monthly_injbol["INJBOL"]
+dfacc_monthly["NUMKIL"] = dfacc_monthly_kil["NUMKIL"]
+dfacc_monthly["NUMACCKIL"] = dfacc_monthly_kilbol["KILBOL"]
+
+#%%
+dfacc_monthly["SHAREACCINJ"] = dfacc_monthly["NUMACCINJ"] / dfacc_monthly["COUNT"]
+dfacc_monthly["SHAREACCKIL"] = dfacc_monthly["NUMACCKIL"] / dfacc_monthly["COUNT"]  
+
+#%%
+# Converting back to datetime
+dfacc_monthly["monyear"] = dfacc_monthly["monyear"].astype("datetime64[ns]")
+
+#%%
+# Plotting share of accidents each month that yield injury.
+sns.scatterplot(data = dfacc_monthly, hue = "BOROUGH", x = "monyear", y = "NUMACCINJ", legend = False)
+#%%
+# Plotting share of accidents each month that yield injury.
+sns.scatterplot(data = dfacc_monthly, hue = "BOROUGH", x = "monyear", y = "SHAREACCINJ")
+#%%
+# Plotting share of accidents each month that yield injury.
+sns.scatterplot(data = dfacc_monthly, hue = "BOROUGH", x = "monyear", y = "SHAREACCKIL")
+
+#%%
+dfacc_monthly["YEAR"] = dfacc_monthly["monyear"].dt.year
+dfacc_monthly["MONTH"] = dfacc_monthly["monyear"].dt.month
+
+dfacc_monthly["YEAR"] = dfacc_monthly["YEAR"].astype("category")
+dfacc_monthly["MONTH"] = dfacc_monthly["MONTH"].astype("category")
+
+#%%
+# Now trying a T-test
+# Null hypothesis, H_0: The average number of accidents report per month is the same before and after the onset of the pandemic.
+# Alternate hypothesis, H_a: There is a statistically significant difference between the average number of accidents reported before and after the
+# pandemic began.
+
+import scipy
+scipy.stats.ttest_ind(dfacc_monthly["COUNT"])
+
+#%%
+# (data = dfacc_monthly, x = "monyear", y = "SHAREACCINJ")
+
+#%%
+# Subsetting df to pre- and post- lockdown date.
+# Lockdown date determined by date cited in https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8806179/
+#dfacc_pre = dfacc.loc[(dfacc["DATETIME"] < "2020-03-23")]
+#dfacc_post = dfacc.loc[(dfacc["DATETIME"] >= "2020-03-23")]
+
+#%%
+# Converting to monthly totals
+dfacc_pre_g = dfacc_pre.groupby(["monyear", "BOROUGH"]).NUMINJ.sum().reset_index()
+dfacc_post_g = dfacc_post.groupby(["monyear", "BOROUGH"]).NUMINJ.sum().reset_index()
+
+
+#%%
+#dacc_pre_g["monyear"] = dacc_pre_g["monyear"].astype("datetime64[ns]")
+#dacc_post_g["monyear"] = dacc_post_g["monyear"].astype("datetime64[ns]")
+#Now, to find the average number of accidents per month pre- and post-lockdown.
+
+#%%
+
+
+#%%
+dfacc_pre_g_tot = dfacc_pre.groupby(["monyear", "BOROUGH"]).COUNT.count().reset_index()
+dfacc_post_g_tot = dfacc_post.groupby(["monyear", "BOROUGH"]).COUNT.count().reset_index()
+
+#%%
+dfacc_pre_g["TOT"] = dfacc_pre_g_tot["COUNT"]
+dfacc_pre_g["SHAREINJ"] = dfacc_pre_g["NUMINJ"] / dfacc_pre_g["TOT"] 
+dfacc_post_g["TOT"] = dfacc_post_g_tot["COUNT"]
+dfacc_post_g["SHAREINJ"] = dfacc_post_g["NUMINJ"] / dfacc_post_g["TOT"]
+
+
+#%%
+
+# Converting back to datetime
+dfacc_pre_g["monyear"] = dfacc_pre_g["monyear"].astype("datetime64[ns]")
+dfacc_post_g["monyear"] = dfacc_post_g["monyear"].astype("datetime64[ns]")
+
+#%%
+sns.histplot(data = dfacc_post, hue = "BOROUGH", x = "monyear")
+
+#%%
+# Plotting share of accidents each month that yield injury.
+sns.scatterplot(x = "monyear", y = "SHAREINJ",
+             hue = "BOROUGH", data = dfacc_pre_g)
+
+#%%
+# Plotting share of accidents each month that yield injury.
+sns.scatterplot(x = "monyear", y = "SHAREINJ",
+             hue = "BOROUGH", data = dfacc_post_g)
+
+#%%
+
+#%%
+
 sns.scatterplot(x = "monyear", y = "NUMINJ",
-             hue = "BOROUGH", data = dacc_mytest_inj )
+             hue = "BOROUGH", data = dfacc)
 
 #%%
-dacc_mytest["monyear"] = dacc_mytest["monyear"].astype("datetime64[ns]")
-sns.scatterplot(x = "monyear", y = "NUMKIL", hue = "BOROUGH", data = dacc_mytest )
-
+### Old cleaning attempts follow below.
 #%%
 #Experimenting with fixing V1!!
 
