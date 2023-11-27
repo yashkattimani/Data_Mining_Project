@@ -16,5 +16,7 @@
 #### Khush + Sairam: What is the prevalence of accidents by location (borough/zip/longitude/latitude)?
 
 
-#### Update 11/19: The team met to discuss progress on EDA and ideas for models. We decided to Keep working on our assigned pieces, and start getting EDA and statistical test results int the deck by Nov 25, and to dig into models as well. Our aim is to complete our draft slides by our 12/2 Team meeting.
+#### Update 11/19: The team met to discuss progress on EDA and ideas for models. We decided to keep working on our assigned pieces, and start getting EDA and statistical test results int the deck by Nov 25, and to dig into models as well. Our aim is to complete our draft slides by our 12/2 Team meeting.
+
+#### Update 11/26: Emily and Sairam met and briefly discussed timelines and models. We will move our content into the slide deck this weekend and check in after Tuesday's class regarding the models.
 
