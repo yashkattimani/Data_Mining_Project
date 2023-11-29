@@ -359,6 +359,7 @@ by_season = full_year.groupby(['SEASON', 'YEAR'])[['NUMINJ', 'NUMKIL']].count().
 
 plt.figure(figsize=(10, 6))
 sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
+plt.title("Total number of people injured by season")
 plt.show()
 
 #%%[markdown]
@@ -490,4 +491,6 @@ plt.ylabel('Total Number of Injuries')
 
 plt.tight_layout()
 plt.show()
-# %%
+# %%[markdown]
+
+# Decision Tree Modelling
