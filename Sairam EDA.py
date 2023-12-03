@@ -475,12 +475,29 @@ plt.show()
 
 # Decision Tree Modelling
 
+# Updating Severity clause and adding a variable to capture number of vehicles
+conditions = [
+    (df['NUMINJ'] == 0),
+    (df['NUMINJ'] > 0) | (df['NUMKIL'] > 0)
+]
+
+values = ['No Injury', 'Injury']
+
+df['SEVERITY'] = np.select(conditions, values, default='Others')
+
+
+df['VEHICLES'] = df[['V1', 'V2', 'V3', 'V4', 'V5']].count(axis=1)
+
+
+#%%
+
+#%%
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, classification_report
 
-features = ['BOROUGH', 'CFV1', 'YEAR', 'MONTH', 'DAY', 'HOUR']
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR','VEHICLES']
 target = 'SEVERITY' 
 
 # Dropping missing data
@@ -488,7 +505,7 @@ df_model = df[features + [target]].dropna()
 
 # Encoding Categories
 #label_encoder = LabelEncoder()
-#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
 #df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
 
 #  Creating Train Test split
@@ -499,7 +516,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-clf = DecisionTreeClassifier(random_state=40, max_depth=4)
+clf = DecisionTreeClassifier(random_state=40, max_depth=3)
 clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
@@ -512,27 +529,41 @@ print("Classification Report:\n", classification_rep)
 
 
 
+
 #%%
 
-# Add number of vehicles involved as a factor
 
 
-# %%
-%matplotlib inline
-from sklearn.tree import plot_tree
-import matplotlib.pyplot as plt
+plt.figure(figsize=(20, 15))  # Adjust the figsize as needed
 
-# Assuming clf is your decision tree classifier
-plt.figure(figsize=(20, 10))  # Adjust the figsize as needed
-plot_tree(clf, filled=True, feature_names=features, rounded=True)
+# Plot the decision tree with additional details
+plot_tree(
+    clf,
+    filled=True,
+    feature_names=features,
+    rounded=True,
+    class_names=clf.classes_,
+    proportion=True,  # Show proportions in leaf nodes
+    precision=2,  # Set precision for displayed values
+    impurity=False,  # Remove impurity information for better clarity
+    fontsize=10,  # Adjust fontsize for better readability
+    node_ids=True,  # Show the IDs of the nodes
+)
 
 plt.show()
+
+
+
+
+
+
+
+
 # %%
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-# Assuming df is your DataFrame
 target = 'SEVERITY'
 
 # Dropping missing data
