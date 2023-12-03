@@ -202,6 +202,7 @@ plt.show()
 factor_counts
 # %%
 df.columns
+
 #%% [markdown]
 
 ### Classifying Severity 
@@ -272,27 +273,6 @@ animation_html = HTML(ani.to_jshtml())
 
 animation_html
 
-# %%
-fig, ax = plt.subplots(figsize=(8, 6))
-custom_palette = ['#A5D8DD', '#EA6A47']
-
-def update(frame):
-    ax.clear()
-    data = injury_data[injury_data['Year'] <= frame]
-    counts = data.groupby('Accident Severity Category')['Count'].sum()
-    
-    labels = counts.index
-    sizes = counts.values
-    
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.4, edgecolor='w'), colors=custom_palette)
-    ax.set_title(f'Accident Severity Proportion ({frame})', pad=20)
-
-years = sorted(injury_data['Year'].unique())
-ani = FuncAnimation(fig, update, frames=years, repeat=False)
-
-animation_html = HTML(ani.to_jshtml())
-
-animation_html
 # %%
 by_factor_severity = df.groupby(['CFV1','SEVERITY']).count()
 by_factor_severity.head(35)
@@ -494,3 +474,59 @@ plt.show()
 # %%[markdown]
 
 # Decision Tree Modelling
+
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, classification_report
+
+features = ['BOROUGH', 'CFV1', 'YEAR', 'MONTH', 'DAY', 'HOUR']
+target = 'SEVERITY' 
+
+# Dropping missing data
+df_model = df[features + [target]].dropna()
+
+# Encoding Categories
+label_encoder = LabelEncoder()
+df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
+
+#  Creating Train Test split
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model[features],
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+clf = DecisionTreeClassifier(random_state=40, max_depth=4)
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+
+#%%
+
+# Add number of vehicles involved as a factor
+
+
+# %%
+%matplotlib inline
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+# Assuming clf is your decision tree classifier
+plt.figure(figsize=(20, 10))  # Adjust the figsize as needed
+plot_tree(clf, filled=True, feature_names=features, rounded=True)
+
+plt.show()
+# %%
+from inspect import getmembers
+print( getmembers( clf.tree_ ) )
+# %%
