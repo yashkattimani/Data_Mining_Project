@@ -487,9 +487,9 @@ target = 'SEVERITY'
 df_model = df[features + [target]].dropna()
 
 # Encoding Categories
-label_encoder = LabelEncoder()
-df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
-df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
+#label_encoder = LabelEncoder()
+#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+#df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
 
 #  Creating Train Test split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -511,6 +511,7 @@ print(f"Accuracy: {accuracy}")
 print("Classification Report:\n", classification_rep)
 
 
+
 #%%
 
 # Add number of vehicles involved as a factor
@@ -527,6 +528,53 @@ plot_tree(clf, filled=True, feature_names=features, rounded=True)
 
 plt.show()
 # %%
-from inspect import getmembers
-print( getmembers( clf.tree_ ) )
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Assuming df is your DataFrame
+target = 'SEVERITY'
+
+# Dropping missing data
+df_model = df[['BOROUGH', 'CFV1'] + [target]].dropna()
+
+# One-hot encoding for categorical variables
+df_model = pd.get_dummies(df_model, columns=['BOROUGH', 'CFV1'])
+
+# List of all columns except the target variable
+features = df_model.columns.difference([target]).tolist()
+
+# Creating the Train Test split
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model[features],
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+# Decision Tree Classifier
+clf = DecisionTreeClassifier(random_state=40, max_depth=3)
+clf.fit(X_train, y_train)
+
+# Predictions
+y_pred = clf.predict(X_test)
+
+# Model Evaluation
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+# %%
+
+%matplotlib inline
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+# Assuming clf is your decision tree classifier
+plt.figure(figsize=(20, 10))  # Adjust the figsize as needed
+plot_tree(clf, filled=True, feature_names=features, rounded=True)
+
+plt.show()
 # %%
