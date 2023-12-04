@@ -560,22 +560,23 @@ plt.show()
 
 
 # %%
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score, classification_report
-
-target = 'SEVERITY'
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR','VEHICLES','CFV1']
+target = 'SEVERITY' 
 
 # Dropping missing data
-df_model = df[['BOROUGH', 'CFV1'] + [target]].dropna()
+df_model = df[features + [target]].dropna()
 
-# One-hot encoding for categorical variables
-df_model = pd.get_dummies(df_model, columns=['BOROUGH', 'CFV1'])
 
-# List of all columns except the target variable
-features = df_model.columns.difference([target]).tolist()
 
-# Creating the Train Test split
+# Dropping missing data
+df_model = df[features + [target]].dropna()
+
+# Encoding Categories
+#label_encoder = LabelEncoder()
+df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
+
+#  Creating Train Test split
 X_train, X_test, y_train, y_test = train_test_split(
     df_model[features],
     df_model[target],
@@ -583,29 +584,37 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-# Decision Tree Classifier
 clf = DecisionTreeClassifier(random_state=40, max_depth=3)
 clf.fit(X_train, y_train)
 
-# Predictions
 y_pred = clf.predict(X_test)
 
-# Model Evaluation
 accuracy = accuracy_score(y_test, y_pred)
 classification_rep = classification_report(y_test, y_pred)
 
 print(f"Accuracy: {accuracy}")
 print("Classification Report:\n", classification_rep)
 
-# %%
 
-%matplotlib inline
-from sklearn.tree import plot_tree
-import matplotlib.pyplot as plt
 
-# Assuming clf is your decision tree classifier
-plt.figure(figsize=(20, 10))  # Adjust the figsize as needed
-plot_tree(clf, filled=True, feature_names=features, rounded=True)
+
+plt.figure(figsize=(20, 15))  # Adjust the figsize as needed
+
+# Plot the decision tree with additional details
+plot_tree(
+    clf,
+    filled=True,
+    feature_names=features,
+    rounded=True,
+    class_names=clf.classes_,
+    proportion=True,  # Show proportions in leaf nodes
+    precision=2,  # Set precision for displayed values
+    impurity=False,  # Remove impurity information for better clarity
+    fontsize=10,  # Adjust fontsize for better readability
+    node_ids=True,  # Show the IDs of the nodes
+)
 
 plt.show()
-# %%[markdown]
+
+
+# %%
