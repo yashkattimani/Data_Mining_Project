@@ -348,21 +348,34 @@ plt.show()
 
 # %%
 
+# Grouping by season and year
 by_season = full_year.groupby(['SEASON', 'YEAR'])[['NUMINJ', 'NUMKIL']].mean().reset_index()
 
+sns.set(font_scale=1.2)
 
+sns.set_palette("Set2")
+
+sns.set_style("whitegrid")
+
+# Plot for the average number of people injured by season
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
-plt.title("Average number of people injured by season")
+sns.lineplot(data=by_season, x='YEAR', y='NUMINJ', hue='SEASON')
+plt.title("Average Number of People Injured by Season", fontsize=16)
+plt.xlabel("Year", fontsize=14)
+plt.ylabel("Average Number of Injuries", fontsize=14)
+plt.legend(title='Season', title_fontsize='14', fontsize='12')
+plt.tight_layout() 
 plt.show()
 
-
+# Plot for the average number of people killed by season
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=by_season,x='YEAR',y='NUMKIL',hue='SEASON')
-plt.title("Average number of people killed by season")
+sns.lineplot(data=by_season, x='YEAR', y='NUMKIL', hue='SEASON')
+plt.title("Average Number of People Killed by Season", fontsize=16)
+plt.xlabel("Year", fontsize=14)
+plt.ylabel("Average Number of Fatalities", fontsize=14)
+plt.legend(title='Season', title_fontsize='14', fontsize='12')
+plt.tight_layout()  
 plt.show()
-
-
 #%%[markdown]
 
 # Are accidents more deadlier and dangerous at different times ?
@@ -399,39 +412,42 @@ plt.xlabel("Hour of the Day")
 plt.ylabel("Average Number of Injuries")
 plt.show()
 # %%
+sns.set_palette("pastel")
+
+sns.set_style("whitegrid")
+
 plt.figure(figsize=(15, 10))
 
 # Subplot 1: NUMPEDINJ
 plt.subplot(2, 2, 1)
 sns.barplot(data=by_hour, x='HOUR', y='NUMPEDINJ', color='skyblue')
-plt.title('Pedestrian Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Average Number of Injuries')
+plt.title('Pedestrian Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 2: NUMCYCINJ
 plt.subplot(2, 2, 2)
 sns.barplot(data=by_hour, x='HOUR', y='NUMCYCINJ', color='lightcoral')
-plt.title('Cyclist Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Average Number of Injuries')
+plt.title('Cyclist Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 3: NUMMOTINJ
 plt.subplot(2, 2, 3)
 sns.barplot(data=by_hour, x='HOUR', y='NUMMOTINJ', color='lightgreen')
-plt.title('Motorist Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Average Number of Injuries')
+plt.title('Motorist Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 4: NUMINJ
 plt.subplot(2, 2, 4)
 sns.barplot(data=by_hour, x='HOUR', y='NUMINJ', color='orange')
-plt.title('Total Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Average Number of Injuries')
+plt.title('Total Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 plt.tight_layout()
 plt.show()
-
 #%%[markdown]
 #Same thing but totals instead of averages
 # %%
@@ -439,35 +455,39 @@ plt.show()
 by_hour = full_year.groupby(['HOUR'])[['NUMINJ', 'NUMKIL','NUMPEDINJ', 'NUMPEDKIL', 'NUMCYCINJ',
        'NUMCYCKIL', 'NUMMOTINJ', 'NUMMOTKIL']].sum().reset_index()
 
+sns.set_palette("pastel")
+
+sns.set_style("whitegrid")
+
 plt.figure(figsize=(15, 10))
 
 # Subplot 1: NUMPEDINJ
 plt.subplot(2, 2, 1)
 sns.barplot(data=by_hour, x='HOUR', y='NUMPEDINJ', color='skyblue')
-plt.title('Pedestrian Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Total Number of Injuries')
+plt.title('Pedestrian Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 2: NUMCYCINJ
 plt.subplot(2, 2, 2)
 sns.barplot(data=by_hour, x='HOUR', y='NUMCYCINJ', color='lightcoral')
-plt.title('Cyclist Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Total Number of Injuries')
+plt.title('Cyclist Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 3: NUMMOTINJ
 plt.subplot(2, 2, 3)
 sns.barplot(data=by_hour, x='HOUR', y='NUMMOTINJ', color='lightgreen')
-plt.title('Motorist Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Total Number of Injuries')
+plt.title('Motorist Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 # Subplot 4: NUMINJ
 plt.subplot(2, 2, 4)
 sns.barplot(data=by_hour, x='HOUR', y='NUMINJ', color='orange')
-plt.title('Total Injuries')
-plt.xlabel('Hour of the Day')
-plt.ylabel('Total Number of Injuries')
+plt.title('Total Injuries', fontsize=16)
+plt.xlabel('Hour of the Day', fontsize=14)
+plt.ylabel('Average Number of Injuries', fontsize=14)
 
 plt.tight_layout()
 plt.show()
@@ -496,7 +516,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, classification_report
-
+#%%
 features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR','VEHICLES']
 target = 'SEVERITY' 
 
@@ -504,7 +524,7 @@ target = 'SEVERITY'
 df_model = df[features + [target]].dropna()
 
 # Encoding Categories
-#label_encoder = LabelEncoder()
+label_encoder = LabelEncoder()
 df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
 #df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
 
@@ -532,9 +552,9 @@ print("Classification Report:\n", classification_rep)
 
 #%%
 
+from sklearn.tree import plot_tree
 
-
-plt.figure(figsize=(20, 15))  # Adjust the figsize as needed
+plt.figure(figsize=(20, 15))
 
 # Plot the decision tree with additional details
 plot_tree(
@@ -543,11 +563,11 @@ plot_tree(
     feature_names=features,
     rounded=True,
     class_names=clf.classes_,
-    proportion=True,  # Show proportions in leaf nodes
-    precision=2,  # Set precision for displayed values
-    impurity=False,  # Remove impurity information for better clarity
-    fontsize=10,  # Adjust fontsize for better readability
-    node_ids=True,  # Show the IDs of the nodes
+    proportion=True,
+    precision=2,
+    impurity=False,
+    fontsize=10,
+    node_ids=True,
 )
 
 plt.show()
@@ -596,11 +616,9 @@ print(f"Accuracy: {accuracy}")
 print("Classification Report:\n", classification_rep)
 
 
+#%%
 
-
-plt.figure(figsize=(20, 15))  # Adjust the figsize as needed
-
-# Plot the decision tree with additional details
+plt.figure(figsize=(20, 15))  
 plot_tree(
     clf,
     filled=True,
@@ -617,4 +635,144 @@ plot_tree(
 plt.show()
 
 
+# %%[markdown]
+
+## One hot encoding Borough and CFV and also binning CFV into the top 10
+# %%
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1']
+target = 'SEVERITY'
+
+# Dropping missing data
+df_model = df[features + [target]].dropna()
+
+# Bin 'CFV1' into the top 10 most occurring values
+top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
+df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
+
+# One-hot encode the 'CFV1' feature
+df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
+
+# Encoding Categories
+label_encoder = LabelEncoder()
+#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+
+# One-hot encode the 'BOROUGH' feature
+df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+
+# Creating Train Test split
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model.drop(target, axis=1),
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+clf = DecisionTreeClassifier(random_state=40, max_depth=3)
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+# One-hot encode 'CFV1' for the feature_names in plot_tree
+features_after_encoding = list(X_train.columns)
+plt.figure(figsize=(20, 15))  
+plot_tree(
+    clf,
+    filled=True,
+    feature_names=features_after_encoding,
+    rounded=True,
+    class_names=clf.classes_,
+    proportion=True,
+    precision=2,
+    impurity=False,
+    fontsize=10,
+    node_ids=True,
+)
+
+plt.show()
+
+
+
+
+# %%[markdown]
+
+## Adding Vehicle count
+# %%
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1','VEHICLES']
+target = 'SEVERITY'
+
+# Dropping missing data
+df_model = df[features + [target]].dropna()
+
+# Bin 'CFV1' into the top 10 most occurring values
+top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
+df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
+
+# One-hot encode the 'CFV1' feature
+df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
+
+# Encoding Categories
+label_encoder = LabelEncoder()
+#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
+
+# One-hot encode the 'BOROUGH' feature
+df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+
+# Creating Train Test split
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model.drop(target, axis=1),
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+clf = DecisionTreeClassifier(random_state=40, max_depth=3)
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+# One-hot encode 'CFV1' for the feature_names in plot_tree
+features_after_encoding = list(X_train.columns)
+plt.figure(figsize=(20, 15))  
+plot_tree(
+    clf,
+    filled=True,
+    feature_names=features_after_encoding,
+    rounded=True,
+    class_names=clf.classes_,
+    proportion=True,
+    precision=2,
+    impurity=False,
+    fontsize=10,
+    node_ids=True,
+)
+
+plt.show()
+
+# %%
+top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+
+df_top_cfv1 = df_model[df_model['CFV1'].isin(top_10_cfv1)]
+
+plt.figure(figsize=(12, 8))
+sns.countplot(x='CFV1', hue='SEVERITY', data=df_top_cfv1, order=top_10_cfv1, palette='viridis')
+plt.title('Proportion of Severities for Top 10 CFV1 Values')
+plt.xlabel('CFV1 Values')
+plt.xticks(rotation=45)
+plt.ylabel('Count')
+plt.legend(title='Severity', loc='upper right')
+plt.show()
 # %%

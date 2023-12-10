@@ -53,8 +53,8 @@ df.head()
 
 # %%
 
-rush_hour_start = 7
-rush_hour_end = 9
+rush_hour_start = 0
+rush_hour_end = 24
 
 rush_hour_data = df[(df['Hour'] >= rush_hour_start) & (df['Hour'] <= rush_hour_end)]
 
@@ -381,6 +381,41 @@ sns.lineplot(data=by_month, x='Month', y='ZIP CODE',hue='Year')
 plt.title('Monthly Incidents')
 plt.xlabel('Month')
 plt.ylabel('Number of Incidents')
+plt.xticks(rotation=45)
+plt.show()
+
+# %%
+
+df.columns
+# %%
+df['BOROUGH'].unique()
+# %%
+unique_df = pd.DataFrame()
+
+for column in df.columns:
+    unique_df[column] = pd.Series(df[column].unique())
+
+# Display the new DataFrame
+print(unique_df)
+# %%
+unique_df[['BOROUGH', 'ZIP CODE', 'LATITUDE',
+       'LONGITUDE', 'LOCATION', 'ON STREET NAME', 'CROSS STREET NAME',
+       'OFF STREET NAME', 'NUMBER OF PERSONS INJURED',
+       'NUMBER OF PERSONS KILLED', 'NUMBER OF PEDESTRIANS INJURED',
+       'NUMBER OF PEDESTRIANS KILLED', 'NUMBER OF CYCLIST INJURED',
+       'NUMBER OF CYCLIST KILLED', 'NUMBER OF MOTORIST INJURED',
+       'NUMBER OF MOTORIST KILLED', 'CONTRIBUTING FACTOR VEHICLE 1',
+       'CONTRIBUTING FACTOR VEHICLE 2', 'CONTRIBUTING FACTOR VEHICLE 3',
+       'CONTRIBUTING FACTOR VEHICLE 4', 'CONTRIBUTING FACTOR VEHICLE 5',
+       'COLLISION_ID', 'VEHICLE TYPE CODE 1', 'VEHICLE TYPE CODE 2',
+       'VEHICLE TYPE CODE 3', 'VEHICLE TYPE CODE 4', 'VEHICLE TYPE CODE 5']].head(20)
+# %%
+df['CONTRIBUTING FACTOR VEHICLE 1'].unique()
+# %%
+df.dtypes
+# %%
+plt.figure(figsize=(20,8))
+sns.histplot(data = df,x='CONTRIBUTING FACTOR VEHICLE 1')
 plt.xticks(rotation=45)
 plt.show()
 
