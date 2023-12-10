@@ -775,6 +775,53 @@ plt.xticks(rotation=45)
 plt.ylabel('Count')
 plt.legend(title='Severity', loc='upper right')
 plt.show()
+# %%[markdown]
+
+### Logistic Regression
+
+#%%
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1']
+target = 'SEVERITY'
+
+df_model = df[features + [target]].dropna()
+
+top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
+df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
+
+df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
+df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model.drop(target, axis=1),
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+logreg = LogisticRegression(random_state=42)
+logreg.fit(X_train, y_train)
+
+y_pred = logreg.predict(X_test)
+
+# Evaluating the model
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+# Visualize the coefficients
+plt.figure(figsize=(12, 8))
+sns.barplot(x=logreg.coef_[0], y=X_train.columns, palette='viridis')
+plt.title('Logistic Regression Coefficients')
+plt.xlabel('Coefficient Value')
+plt.ylabel('Features')
+plt.show()
+
+
 # %%
-
-
