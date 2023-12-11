@@ -503,7 +503,7 @@ conditions = [
 
 values = ['No Injury', 'Injury']
 
-df['SEVERITY'] = np.select(conditions, values, default='Others')
+df['SEVERITY'] = np.select(conditions, values, default='No Injury')
 
 
 df['VEHICLES'] = df[['V1', 'V2', 'V3', 'V4', 'V5']].count(axis=1)
@@ -579,86 +579,31 @@ plt.show()
 
 
 
-# %%
-features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR','VEHICLES','CFV1']
-target = 'SEVERITY' 
-
-# Dropping missing data
-df_model = df[features + [target]].dropna()
-
-
-
-# Dropping missing data
-df_model = df[features + [target]].dropna()
-
-# Encoding Categories
-#label_encoder = LabelEncoder()
-df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
-df_model['CFV1'] = label_encoder.fit_transform(df_model['CFV1'])
-
-#  Creating Train Test split
-X_train, X_test, y_train, y_test = train_test_split(
-    df_model[features],
-    df_model[target],
-    test_size=0.2,
-    random_state=42
-)
-
-clf = DecisionTreeClassifier(random_state=40, max_depth=3)
-clf.fit(X_train, y_train)
-
-y_pred = clf.predict(X_test)
-
-accuracy = accuracy_score(y_test, y_pred)
-classification_rep = classification_report(y_test, y_pred)
-
-print(f"Accuracy: {accuracy}")
-print("Classification Report:\n", classification_rep)
-
-
-#%%
-
-plt.figure(figsize=(20, 15))  
-plot_tree(
-    clf,
-    filled=True,
-    feature_names=features,
-    rounded=True,
-    class_names=clf.classes_,
-    proportion=True,  # Show proportions in leaf nodes
-    precision=2,  # Set precision for displayed values
-    impurity=False,  # Remove impurity information for better clarity
-    fontsize=10,  # Adjust fontsize for better readability
-    node_ids=True,  # Show the IDs of the nodes
-)
-
-plt.show()
-
 
 # %%[markdown]
 
 ## One hot encoding Borough and CFV and also binning CFV into the top 10
 # %%
-features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1']
+df['SEASON'] = df['MONTH'].apply(get_season)
+
+
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1','SEASON']
 target = 'SEVERITY'
 
-# Dropping missing data
 df_model = df[features + [target]].dropna()
 
-# Bin 'CFV1' into the top 10 most occurring values
+# Binning 'CFV1' into the top 10 most occurring values
 top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
 df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
 df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
 
-# One-hot encode the 'CFV1' feature
+# One-hot encoding the features
 df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
 
-# Encoding Categories
-label_encoder = LabelEncoder()
-#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
-
-# One-hot encode the 'BOROUGH' feature
 df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+
+df_model = pd.get_dummies(df_model, columns=['SEASON'], drop_first=True)
+
 
 # Creating Train Test split
 X_train, X_test, y_train, y_test = train_test_split(
@@ -679,26 +624,46 @@ classification_rep = classification_report(y_test, y_pred)
 print(f"Accuracy: {accuracy}")
 print("Classification Report:\n", classification_rep)
 
+#%%
+
 # One-hot encode 'CFV1' for the feature_names in plot_tree
 features_after_encoding = list(X_train.columns)
-plt.figure(figsize=(20, 15))  
+
+# Simplified Decision Tree Plot
+plt.figure(figsize=(20, 15))
 plot_tree(
     clf,
     filled=True,
     feature_names=features_after_encoding,
     rounded=True,
     class_names=clf.classes_,
-    proportion=True,
-    precision=2,
+    #class_names=[],
     impurity=False,
-    fontsize=10,
-    node_ids=True,
+    fontsize=11,
+    proportion=True
+    
+
 )
 
 plt.show()
 
+#%% [markdown]
 
+# Plotting the confusion matrix
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(10, 8))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot(cmap='Blues', values_format='d')
+
+plt.title('Confusion Matrix for the Decision Tree Classifier')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.grid(False)  
+plt.show()
 
 # %%[markdown]
 
@@ -763,9 +728,9 @@ plot_tree(
 plt.show()
 
 # %%
-top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+top_10_cfv1 = df['CFV1'].value_counts().nlargest(10).index
 
-df_top_cfv1 = df_model[df_model['CFV1'].isin(top_10_cfv1)]
+df_top_cfv1 = df[df['CFV1'].isin(top_10_cfv1)]
 
 plt.figure(figsize=(12, 8))
 sns.countplot(x='CFV1', hue='SEVERITY', data=df_top_cfv1, order=top_10_cfv1, palette='viridis')
@@ -775,6 +740,20 @@ plt.xticks(rotation=45)
 plt.ylabel('Count')
 plt.legend(title='Severity', loc='upper right')
 plt.show()
+
+
+
+# %%
+
+plt.figure(figsize=(12, 8))
+sns.countplot(x='VEHICLES', hue='SEVERITY', data=df, palette='viridis')
+plt.title('Proportion of Severities for Top 10 CFV1 Values')
+plt.xlabel('Number of Vehicles')
+plt.xticks(rotation=45)
+plt.ylabel('Count')
+plt.legend(title='Severity', loc='upper right')
+plt.show()
+
 # %%[markdown]
 
 ### Logistic Regression
@@ -784,7 +763,7 @@ plt.show()
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
-features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1']
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1','SEASON']
 target = 'SEVERITY'
 
 df_model = df[features + [target]].dropna()
@@ -795,6 +774,7 @@ df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
 
 df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
 df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+df_model = pd.get_dummies(df_model, columns=['SEASON'], drop_first=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
     df_model.drop(target, axis=1),
@@ -803,9 +783,10 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
+
 logreg = LogisticRegression(random_state=42)
 logreg.fit(X_train, y_train)
-
+#%%
 y_pred = logreg.predict(X_test)
 
 # Evaluating the model
@@ -822,6 +803,69 @@ plt.title('Logistic Regression Coefficients')
 plt.xlabel('Coefficient Value')
 plt.ylabel('Features')
 plt.show()
+
+
+# %%
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(10, 8))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot(cmap='Blues', values_format='d')
+
+plt.title('Confusion Matrix for the Logistic Model')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.grid(False)  
+plt.show()
+# %%[markdown]
+
+# Plotting the ROC AUC curve and also figuring out which cutoff to use
+
+#%%
+from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import precision_recall_curve, auc
+from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import LabelEncoder
+
+label_encoder = LabelEncoder()
+y_test_numeric = label_encoder.fit_transform(y_test)
+
+y_prob = logreg.predict_proba(X_test)[:, 1]
+
+fpr, tpr, thresholds = roc_curve(y_test_numeric, y_prob)
+roc_auc = roc_auc_score(y_test_numeric, y_prob)
+
+plt.figure(figsize=(10, 8))
+plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic Curve')
+plt.legend(loc='lower right')
+plt.grid(False)
+plt.show()
+
+# Choosing the best cutoff value based on the ROC curve
+best_cutoff_idx = np.argmax(tpr - fpr)
+best_cutoff = thresholds[best_cutoff_idx]
+
+y_pred_cutoff = (y_prob >= best_cutoff).astype(int)
+cm_best_cutoff = confusion_matrix(y_test_numeric, y_pred_cutoff)
+
+plt.figure(figsize=(8, 6))
+disp_best_cutoff = ConfusionMatrixDisplay(confusion_matrix=cm_best_cutoff, display_labels=logreg.classes_)
+disp_best_cutoff.plot(cmap='Blues', values_format='d')
+plt.title(f'Confusion Matrix for the Logistic Model at the Best Cutoff ({best_cutoff:.2f})')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.grid(False)
+plt.show()
+
+accuracy_best_cutoff = (cm_best_cutoff[0, 0] + cm_best_cutoff[1, 1]) / np.sum(cm_best_cutoff)
+
+print(f"Accuracy at Best Cutoff ({best_cutoff:.2f}): {accuracy_best_cutoff:.4f}")
 
 
 # %%
