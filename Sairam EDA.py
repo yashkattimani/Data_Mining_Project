@@ -337,9 +337,19 @@ plt.show()
 by_season = full_year.groupby(['SEASON', 'YEAR'])[['NUMINJ', 'NUMKIL']].count().reset_index()
 
 
+sns.set(font_scale=1.2)
+
+sns.set_palette("Set2")
+
+sns.set_style("whitegrid")
+
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=by_season,x='YEAR',y='NUMINJ',hue='SEASON')
-plt.title("Total number of people injured by season")
+sns.lineplot(data=by_season, x='YEAR', y='NUMINJ', hue='SEASON')
+plt.title("Total Number of People Injured by Season", fontsize=16)
+plt.xlabel("Year", fontsize=14)
+plt.ylabel("Total Number of Injuries", fontsize=14)
+plt.legend(title='Season', title_fontsize='14', fontsize='12')
+plt.tight_layout() 
 plt.show()
 
 #%%[markdown]
@@ -466,28 +476,28 @@ plt.subplot(2, 2, 1)
 sns.barplot(data=by_hour, x='HOUR', y='NUMPEDINJ', color='skyblue')
 plt.title('Pedestrian Injuries', fontsize=16)
 plt.xlabel('Hour of the Day', fontsize=14)
-plt.ylabel('Average Number of Injuries', fontsize=14)
+plt.ylabel('Total Number of Injuries', fontsize=14)
 
 # Subplot 2: NUMCYCINJ
 plt.subplot(2, 2, 2)
 sns.barplot(data=by_hour, x='HOUR', y='NUMCYCINJ', color='lightcoral')
 plt.title('Cyclist Injuries', fontsize=16)
 plt.xlabel('Hour of the Day', fontsize=14)
-plt.ylabel('Average Number of Injuries', fontsize=14)
+plt.ylabel('Total Number of Injuries', fontsize=14)
 
 # Subplot 3: NUMMOTINJ
 plt.subplot(2, 2, 3)
 sns.barplot(data=by_hour, x='HOUR', y='NUMMOTINJ', color='lightgreen')
 plt.title('Motorist Injuries', fontsize=16)
 plt.xlabel('Hour of the Day', fontsize=14)
-plt.ylabel('Average Number of Injuries', fontsize=14)
+plt.ylabel('Total Number of Injuries', fontsize=14)
 
 # Subplot 4: NUMINJ
 plt.subplot(2, 2, 4)
 sns.barplot(data=by_hour, x='HOUR', y='NUMINJ', color='orange')
 plt.title('Total Injuries', fontsize=16)
 plt.xlabel('Hour of the Day', fontsize=14)
-plt.ylabel('Average Number of Injuries', fontsize=14)
+plt.ylabel('Total Number of Injuries', fontsize=14)
 
 plt.tight_layout()
 plt.show()
@@ -672,20 +682,14 @@ plt.show()
 features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1','VEHICLES']
 target = 'SEVERITY'
 
-# Dropping missing data
 df_model = df[features + [target]].dropna()
 
-# Bin 'CFV1' into the top 10 most occurring values
+# Binning  'CFV1' into the top 10 most occurring values
 top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
 df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
 df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
 
-# One-hot encode the 'CFV1' feature
 df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
-
-# Encoding Categories
-label_encoder = LabelEncoder()
-#df_model['BOROUGH'] = label_encoder.fit_transform(df_model['BOROUGH'])
 
 # One-hot encode the 'BOROUGH' feature
 df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
