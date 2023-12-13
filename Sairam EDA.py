@@ -675,6 +675,99 @@ plt.ylabel('True Label')
 plt.grid(False)  
 plt.show()
 
+
+#%%[markdown]
+
+#### Removing post covid years
+
+#%%
+
+
+
+features = ['BOROUGH', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'CFV1','SEASON','V1']
+target = 'SEVERITY'
+
+df_model = df[features + [target]].dropna()
+df_model = df_model[df_model['YEAR'] <= 2019]
+
+top_10_cfv1 = df_model['CFV1'].value_counts().nlargest(10).index
+df_model['CFV1'] = df_model['CFV1'].astype('str')  # Convert to string type
+df_model.loc[~df_model['CFV1'].isin(top_10_cfv1), 'CFV1'] = 'Other'
+
+
+top_10_v1 = df_model['V1'].value_counts().nlargest(10).index
+df_model['V1'] = df_model['V1'].astype('str')  # Convert to string type
+df_model.loc[~df_model['V1'].isin(top_10_v1), 'V1'] = 'Other'
+
+
+# One-hot encoding the features
+df_model = pd.get_dummies(df_model, columns=['CFV1'], drop_first=True)
+
+df_model = pd.get_dummies(df_model, columns=['BOROUGH'], drop_first=True)
+
+df_model = pd.get_dummies(df_model, columns=['SEASON'], drop_first=True)
+
+df_model = pd.get_dummies(df_model, columns=['HOUR'], drop_first=True)
+
+df_model = pd.get_dummies(df_model, columns=['V1'], drop_first=True)
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    df_model.drop(target, axis=1),
+    df_model[target],
+    test_size=0.2,
+    random_state=42
+)
+
+clf = DecisionTreeClassifier(random_state=40, max_depth=3)
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+
+print(f"Accuracy: {accuracy}")
+print("Classification Report:\n", classification_rep)
+
+features_after_encoding = list(X_train.columns)
+
+plt.figure(figsize=(20, 15))
+plot_tree(
+    clf,
+    filled=True,
+    feature_names=features_after_encoding,
+    rounded=True,
+    class_names=clf.classes_,
+    #class_names=[],
+    impurity=False,
+    fontsize=11,
+    proportion=True
+    
+
+)
+
+plt.show()
+
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(10, 8))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=clf.classes_)
+disp.plot(cmap='Blues', values_format='d')
+
+plt.title('Confusion Matrix for the Decision Tree Classifier')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.grid(False)  
+plt.show()
+
+
+
+
+
+
 # %%[markdown]
 
 ## Adding Vehicle count
@@ -870,6 +963,23 @@ plt.show()
 accuracy_best_cutoff = (cm_best_cutoff[0, 0] + cm_best_cutoff[1, 1]) / np.sum(cm_best_cutoff)
 
 print(f"Accuracy at Best Cutoff ({best_cutoff:.2f}): {accuracy_best_cutoff:.4f}")
+
+
+# %%[markdown]
+
+## Chi squared test for seasonal and hour wise differences in injury rates
+
+#%%
+from scipy.stats import chi2_contingency
+severity_season_contingency = pd.crosstab(df['SEVERITY'], df['SEASON'])
+
+chi2_season, p_season, _, _ = chi2_contingency(severity_season_contingency)
+print(f"Chi-squared test for SEASON: Chi2 = {chi2_season}, p-value = {p_season}")
+
+severity_hour_contingency = pd.crosstab(df['SEVERITY'], df['HOUR'])
+
+chi2_hour, p_hour, _, _ = chi2_contingency(severity_hour_contingency)
+print(f"Chi-squared test for HOUR: Chi2 = {chi2_hour}, p-value = {p_hour}")
 
 
 # %%
